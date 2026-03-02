@@ -4,34 +4,34 @@ import { openapi } from "@elysiajs/openapi";
 const app = new Elysia()
   .use(openapi())
   .post("/request",
-    ({ body }) => {
-      return {
-        message: "Success",
+  ({ body }) => {
+    return {
+      message: "Success",
         data: body
       }
-    },
-    {
-      body: t.Object({
-        name: t.String({ minLength: 3 }),
-        email: t.String({ format: "email" }),
+  },
+  {
+    body: t.Object({
+      name: t.String({ minLength: 3 }),
+      email: t.String({ format: "email" }),
         age: t.Number({ minimum: 18 })
       })
     }
   )
 
 app.get(
- "/products/:id",
- ({ params, query }) => {
-   return {
-     productId: params.id,
+  "/products/:id",
+  ({ params, query }) => {
+    return {
+      productId: params.id,
      sortBy: query.sort
    }
- },
- { 
-   query: t.Object({
+  },
+  {
+    query: t.Object({
      sort: t.Union([t.Literal("asc"), t.Literal("desc")])
-   }),
-   params: t.Object({
+    }),
+    params: t.Object({
      id: t.Number()
    })
  }
@@ -52,7 +52,32 @@ app.get(
     })
   }
 )
-.listen(3000);
+
+app.get(
+ "/admin",
+ () => {
+  return {
+    stats: 99
+  }
+ },
+ {
+   headers: t.Object({
+    authorization: t.String()
+   }),
+   beforeHandle({ headers, set }) {
+     if (headers.authorization !== "Bearer 123") {
+       set.status = 401
+       return {
+         success: false,
+         message: "Unauthorized"
+       }
+     }
+   }
+ }
+)
+
+
+  .listen(3000);
 
 
 console.log(`🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`);
