@@ -18,7 +18,25 @@ const app = new Elysia()
       })
     }
   )
-  
+
+app.get(
+ "/products/:id",
+ ({ params, query }) => {
+   return {
+     productId: params.id,
+     sortBy: query.sort
+   }
+ },
+ { 
+   query: t.Object({
+     sort: t.Union([t.Literal("asc"), t.Literal("desc")])
+   }),
+   params: t.Object({
+     id: t.Number()
+   })
+ }
+)
+
   .listen(3000);
 
 
